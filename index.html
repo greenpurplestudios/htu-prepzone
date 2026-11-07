@@ -1,0 +1,1729 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTU PrepZone & HTU Run</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Press+Start+2P&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    * { font-family: 'Cairo', sans-serif; }
+    .pixel-font { font-family: 'Press Start 2P', monospace; }
+    .perspective-1000 { perspective: 1000px; }
+    .transform-style-3d { transform-style: preserve-3d; }
+    .backface-hidden { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+    .rotate-y-180 { transform: rotateY(180deg); }
+    .scrollbar-thin::-webkit-scrollbar { width: 6px; }
+    .scrollbar-thin::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 9999px; }
+    .dark .scrollbar-thin::-webkit-scrollbar-thumb { background-color: #334155; }
+    
+    canvas {
+      image-rendering: -moz-crisp-edges;
+      image-rendering: -webkit-crisp-edges;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+  </style>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              purple: '#6B21A8',
+              emerald: '#10B981',
+              htuRed: '#E11D48',
+              darkBg: '#0f172a'
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-300">
+
+  <!-- Header Navigation -->
+  <header class="sticky top-0 z-40 bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-700 shadow-sm">
+    <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+      
+      <!-- Brand Logo -->
+      <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('quiz')">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-700 via-rose-600 to-emerald-500 flex items-center justify-center text-white shadow-md font-black text-xl">
+          HZ
+        </div>
+        <div>
+          <span class="text-xl font-extrabold bg-gradient-to-r from-purple-700 via-rose-600 to-emerald-500 bg-clip-text text-transparent">HTU PrepZone</span>
+          <span class="hidden sm:inline-block text-[11px] text-slate-500 font-bold px-2 py-0.5 ml-1 bg-slate-100 dark:bg-slate-700 rounded-md">Smart Prep & Arcade</span>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs (Desktop) -->
+      <nav class="hidden lg:flex items-center gap-1 bg-slate-100 dark:bg-slate-700/60 p-1 rounded-xl text-xs font-bold">
+        <button onclick="switchTab('quiz')" id="nav-btn-quiz" class="px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 transition-all bg-white dark:bg-slate-800 text-purple-700 dark:text-purple-300 shadow-sm">
+          <i data-lucide="award" class="w-4 h-4"></i>
+          الامتحانات
+        </button>
+        <button onclick="switchTab('game')" id="nav-btn-game" class="px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 transition-all text-rose-600 hover:text-rose-700">
+          <i data-lucide="gamepad-2" class="w-4 h-4"></i>
+          HTU Run 🎮
+        </button>
+        <button onclick="switchTab('cards')" id="nav-btn-cards" class="px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 transition-all text-slate-600 dark:text-slate-300 hover:text-purple-600">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          فلاش كاردز
+        </button>
+        <button onclick="switchTab('leaderboard')" id="nav-btn-leaderboard" class="px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 transition-all text-slate-600 dark:text-slate-300 hover:text-amber-500">
+          <i data-lucide="trophy" class="w-4 h-4"></i>
+          المتصدرون
+        </button>
+        <button onclick="switchTab('cheat')" id="nav-btn-cheat" class="px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 transition-all text-slate-600 dark:text-slate-300 hover:text-purple-600">
+          <i data-lucide="search" class="w-4 h-4"></i>
+          الدليل
+        </button>
+        <button onclick="switchTab('notebook')" id="nav-btn-notebook" class="px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 transition-all text-slate-600 dark:text-slate-300 hover:text-purple-600">
+          <i data-lucide="pen-tool" class="w-4 h-4"></i>
+          الملاحظات
+        </button>
+        <button onclick="switchTab('feedback')" id="nav-btn-feedback" class="px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 transition-all text-slate-600 dark:text-slate-300 hover:text-emerald-500">
+          <i data-lucide="message-square-plus" class="w-4 h-4"></i>
+          اقتراحات
+        </button>
+      </nav>
+
+      <!-- Action Tools -->
+      <div class="flex items-center gap-2">
+        <!-- Guest Profile Badge -->
+        <div id="profile-badge" onclick="openProfileModal()" class="flex items-center gap-2 px-3 py-1.5 bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800 rounded-xl cursor-pointer hover:border-purple-400 transition-all">
+          <span id="badge-avatar" class="text-base">🎓</span>
+          <span id="badge-name" class="text-xs font-bold text-purple-900 dark:text-purple-200">طالب زائر</span>
+        </div>
+
+        <!-- Instagram Profile Link -->
+        <a href="https://www.instagram.com/greenpurplestudios?rpxt=MXF5NGhia3RraGlwbA==" target="_blank" rel="noopener noreferrer" title="Instagram" class="p-2 text-pink-600 hover:bg-pink-50 dark:hover:bg-slate-700/60 rounded-xl transition-all border border-pink-200 dark:border-pink-900/40">
+          <i data-lucide="instagram" class="w-5 h-5"></i>
+        </a>
+
+        <!-- Admin Secure Trigger -->
+        <button onclick="openAdminModal()" title="Admin" class="p-2 text-slate-500 hover:text-purple-600 dark:hover:text-purple-300 rounded-xl transition-all">
+          <i data-lucide="shield-check" class="w-5 h-5"></i>
+        </button>
+
+        <!-- Dark Mode Toggle -->
+        <button onclick="toggleDarkMode()" class="p-2 text-slate-500 hover:text-amber-500 dark:text-slate-400 dark:hover:text-amber-300 rounded-xl transition-all">
+          <i id="theme-icon" data-lucide="moon" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Main Body Content -->
+  <main class="flex-1 max-w-5xl w-full mx-auto p-4 sm:p-6 pb-24 md:pb-12">
+
+    <!-- VIEW 1: EXAM MODES (RANDOM, MISTAKES ONLY, SUDDEN DEATH) -->
+    <section id="view-quiz" class="space-y-6">
+      
+      <!-- Banner -->
+      <div class="bg-gradient-to-r from-purple-950 via-slate-900 to-indigo-950 text-white rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden">
+        <div class="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 mb-2">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              مساق العلوم العسكرية
+            </span>
+            <h1 class="text-2xl sm:text-3xl font-black mb-1">منصة الاختبارات الذكية</h1>
+            <p class="text-sm text-slate-300">اختر نمط التدريب المناسب لاختبار معلوماتك قبل الامتحان.</p>
+          </div>
+          <div class="flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-white/15 text-xs font-semibold">
+            <i data-lucide="database" class="w-4 h-4 text-emerald-400"></i>
+            <span>بنك الأسئلة: <b id="total-q-count" class="text-emerald-300">55</b> سؤال معتمد</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mode Cards Selector -->
+      <div id="quiz-intro-box" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        
+        <!-- Mode 1: Standard Mock Exam -->
+        <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between hover:border-purple-500 transition-all">
+          <div>
+            <div class="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-300 flex items-center justify-center mb-4">
+              <i data-lucide="shuffle" class="w-6 h-6"></i>
+            </div>
+            <h3 class="text-lg font-black mb-2">كويز عشوائي كامل</h3>
+            <p class="text-xs text-slate-500 leading-relaxed mb-4">15 سؤالاً عشوائياً مختلفاً في كل مرة مع خلط الخيارات ومؤقت 15 دقيقة.</p>
+          </div>
+          <button onclick="startStandardQuiz()" class="w-full py-3 bg-purple-700 hover:bg-purple-800 text-white font-bold rounded-xl text-xs shadow-md shadow-purple-600/20 transition-all">
+            ابدأ كويز شامل
+          </button>
+        </div>
+
+        <!-- Mode 2: Mistakes Only -->
+        <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between hover:border-rose-500 transition-all">
+          <div>
+            <div class="w-12 h-12 rounded-xl bg-rose-100 dark:bg-rose-900/40 text-rose-600 dark:text-rose-300 flex items-center justify-center mb-4">
+              <i data-lucide="alert-circle" class="w-6 h-6"></i>
+            </div>
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-lg font-black">مراجعة أخطائي فقط</h3>
+              <span id="mistakes-count-badge" class="px-2 py-0.5 bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 rounded-full text-[11px] font-bold">0 خطأ</span>
+            </div>
+            <p class="text-xs text-slate-500 leading-relaxed mb-4">اختبار مصمم خصيصاً من الأسئلة التي أجبت عليها خطأ سابقاً لتثبيتها.</p>
+          </div>
+          <button onclick="startMistakesQuiz()" id="btn-start-mistakes" class="w-full py-3 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs shadow-md shadow-rose-600/20 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+            راجع نقاط ضعفك
+          </button>
+        </div>
+
+        <!-- Mode 3: Sudden Death -->
+        <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between hover:border-amber-500 transition-all">
+          <div>
+            <div class="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-300 flex items-center justify-center mb-4">
+              <i data-lucide="zap" class="w-6 h-6"></i>
+            </div>
+            <h3 class="text-lg font-black mb-2">التحدي القاتل (Sudden Death)</h3>
+            <p class="text-xs text-slate-500 leading-relaxed mb-4">20 ثانية لكل سؤال! خطأ واحد فقط يعني خسارة الاختبار فوراً (Game Over).</p>
+          </div>
+          <button onclick="startSuddenDeathQuiz()" class="w-full py-3 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-xs shadow-md shadow-amber-600/20 transition-all">
+            دخول التحدي السريع 🔥
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Active Quiz Interface -->
+      <div id="quiz-active-box" class="hidden space-y-4">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 shadow-sm flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <span id="quiz-mode-tag" class="px-2.5 py-1 bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 text-xs font-bold rounded-lg">شامل</span>
+            <span class="text-sm font-black" id="q-progress-text">1 / 15</span>
+          </div>
+          <div class="flex items-center gap-2 font-mono text-base font-bold bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 px-3 py-1.5 rounded-xl border border-amber-200 dark:border-amber-800">
+            <i data-lucide="clock" class="w-4 h-4"></i>
+            <span id="quiz-timer">15:00</span>
+          </div>
+          <button onclick="abortQuiz()" class="text-xs font-bold text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 px-3 py-1.5 rounded-lg transition-colors">
+            إنهاء
+          </button>
+        </div>
+
+        <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 sm:p-8 border border-slate-200 dark:border-slate-700 shadow-sm">
+          <h3 id="current-question-text" class="text-base sm:text-lg font-bold leading-relaxed mb-6 text-slate-900 dark:text-slate-100">
+            نص السؤال يظهر هنا...
+          </h3>
+          <div id="options-container" class="space-y-3"></div>
+        </div>
+
+        <div class="flex items-center justify-between pt-2">
+          <button id="btn-prev-q" onclick="prevQuestion()" class="px-5 py-2.5 rounded-xl font-bold text-xs bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-300 transition-colors disabled:opacity-40">
+            السابق
+          </button>
+          <button id="btn-next-q" onclick="nextQuestion()" class="px-6 py-2.5 rounded-xl font-bold text-xs bg-purple-700 hover:bg-purple-800 text-white transition-all shadow-md shadow-purple-600/20">
+            التالي
+          </button>
+        </div>
+      </div>
+
+      <!-- Quiz Result Summary -->
+      <div id="quiz-result-box" class="hidden bg-white dark:bg-slate-800 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-700 shadow-sm text-center">
+        <div id="result-badge-icon" class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl shadow-lg">
+          🎉
+        </div>
+        <h2 class="text-2xl font-black mb-1" id="result-title">انتهى الاختبار</h2>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mb-6" id="result-subtitle">تم حفظ نتيجتك في المتصدرين</p>
+
+        <div class="flex justify-center items-center gap-6 mb-8">
+          <div class="p-4 bg-purple-50 dark:bg-purple-950/40 rounded-2xl border border-purple-200 dark:border-purple-800">
+            <span class="block text-xs text-purple-600 font-semibold mb-1">النتيجة</span>
+            <span id="result-score-val" class="text-3xl font-black text-purple-800 dark:text-purple-200">14 / 15</span>
+          </div>
+          <div class="p-4 bg-emerald-50 dark:bg-emerald-950/40 rounded-2xl border border-emerald-200 dark:border-emerald-800">
+            <span class="block text-xs text-emerald-600 font-semibold mb-1">النسبة</span>
+            <span id="result-percentage-val" class="text-3xl font-black text-emerald-700 dark:text-emerald-300">93%</span>
+          </div>
+        </div>
+
+        <div class="text-right mb-8">
+          <h3 class="text-sm font-bold mb-3 flex items-center gap-2">
+            <i data-lucide="check-circle" class="w-4 h-4 text-emerald-500"></i>
+            مراجعة الإجابات:
+          </h3>
+          <div id="quiz-review-list" class="space-y-3 max-h-96 overflow-y-auto scrollbar-thin p-1"></div>
+        </div>
+
+        <div class="flex flex-wrap gap-3 justify-center">
+          <button onclick="returnToQuizSelector()" class="px-6 py-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 font-bold rounded-2xl text-xs transition-all">
+            العودة للقائمة الرئيسية
+          </button>
+          <button onclick="switchTab('leaderboard')" class="px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-2xl text-xs transition-all flex items-center gap-2">
+            <i data-lucide="trophy" class="w-4 h-4"></i>
+            عرض قائمة المتصدرين
+          </button>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- VIEW 2: HTU RUN 2D PIXEL PLATFORMER GAME -->
+    <section id="view-game" class="hidden space-y-6">
+      
+      <!-- Arcade Header -->
+      <div class="bg-gradient-to-r from-slate-900 via-rose-950 to-slate-950 text-white rounded-3xl p-6 sm:p-8 shadow-xl border border-rose-900/30 flex flex-col md:flex-row items-center justify-between gap-6">
+        <div>
+          <div class="flex items-center gap-2 mb-2">
+            <span class="px-2.5 py-0.5 bg-rose-600 text-white font-mono text-[10px] rounded-md font-bold uppercase tracking-wider">Pixel Arcade</span>
+            <span class="text-xs text-rose-300 font-semibold">لعبة الجري في حرم الجامعة</span>
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-black pixel-font text-rose-400">HTU RUN 🏃‍♂️</h2>
+          <p class="text-xs text-slate-300 mt-2 max-w-md leading-relaxed">
+            اقفز فوق الدكاترة، الكتب، وحاويات القمامة، واجمع كاسات قهوة (Astrolabe Coffee) ☕ لزيادة السكور!
+          </p>
+        </div>
+
+        <!-- Character Selector -->
+        <div class="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/15 w-full md:w-auto">
+          <span class="block text-xs font-bold text-slate-200 mb-2">اختر شخصيتك:</span>
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <button onclick="setPlayerChar('boy_short')" id="char-btn-boy_short" class="char-opt-btn p-2 rounded-xl border border-rose-500 bg-rose-500/30 text-white font-bold flex items-center gap-2">
+              <span>👦</span> ولد شعر قصير
+            </button>
+            <button onclick="setPlayerChar('boy_med')" id="char-btn-boy_med" class="char-opt-btn p-2 rounded-xl border border-white/20 hover:border-rose-400 text-slate-200 font-bold flex items-center gap-2">
+              <span>🧑</span> ولد شعر متوسط
+            </button>
+            <button onclick="setPlayerChar('girl_long')" id="char-btn-girl_long" class="char-opt-btn p-2 rounded-xl border border-white/20 hover:border-rose-400 text-slate-200 font-bold flex items-center gap-2">
+              <span>👧</span> بنت شعر طويل
+            </button>
+            <button onclick="setPlayerChar('girl_hijab')" id="char-btn-girl_hijab" class="char-opt-btn p-2 rounded-xl border border-white/20 hover:border-rose-400 text-slate-200 font-bold flex items-center gap-2">
+              <span>🧕</span> بنت محجبة
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Game Canvas Box -->
+      <div class="relative bg-slate-950 rounded-3xl overflow-hidden shadow-2xl border-4 border-slate-800">
+        
+        <!-- Score Bar -->
+        <div class="absolute top-4 left-4 right-4 z-20 flex justify-between items-center pointer-events-none">
+          <div class="bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/20 text-white pixel-font text-xs flex items-center gap-2">
+            <span>☕</span> <span id="game-coffee-count" class="text-amber-400">0</span>
+          </div>
+          <div class="bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/20 text-white pixel-font text-xs flex items-center gap-3">
+            <span>SCORE: <b id="game-score-txt" class="text-rose-400">0</b></span>
+            <span class="text-slate-400">HI: <b id="game-high-txt" class="text-emerald-400">0</b></span>
+          </div>
+        </div>
+
+        <!-- The Canvas -->
+        <canvas id="gameCanvas" width="800" height="300" class="w-full h-64 sm:h-80 block bg-[#87CEEB]"></canvas>
+
+        <!-- Overlay Menu / Game Over -->
+        <div id="game-overlay" class="absolute inset-0 bg-black/70 backdrop-blur-sm flex flex-col items-center justify-center p-4 z-30">
+          <h3 id="overlay-title" class="text-2xl font-black pixel-font text-amber-400 mb-2">HTU RUN</h3>
+          <p id="overlay-msg" class="text-xs text-slate-300 mb-6 text-center max-w-sm">
+            اضغط مسافة (Space) أو اضغط على الشاشة للقفز وتفادي العوائق وجمع القهوة!
+          </p>
+          <button onclick="startArcadeGame()" class="px-8 py-3.5 bg-gradient-to-r from-rose-600 to-amber-500 hover:from-rose-700 hover:to-amber-600 text-white font-black pixel-font text-xs rounded-2xl shadow-xl transform hover:scale-105 transition-all">
+            START GAME ▶
+          </button>
+          <span class="text-[11px] text-slate-400 mt-4">(يدعم شاشات اللمس للجوال)</span>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- VIEW 3: LEADERBOARD (Daily & Arcade) -->
+    <section id="view-leaderboard" class="hidden space-y-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-xl font-bold flex items-center gap-2">
+            <i data-lucide="trophy" class="w-6 h-6 text-amber-500"></i>
+            لوحة المتصدرين (HTU Leaderboard)
+          </h2>
+          <p class="text-xs text-slate-500">أفضل أداء للطلاب اليوم في الامتحانات ولعبة HTU Run</p>
+        </div>
+        <button onclick="resetLeaderboardConfirm()" class="text-xs text-slate-400 hover:text-rose-500 transition-colors">
+          تصفير اللوحة
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        <!-- Quiz Champions -->
+        <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm">
+          <h3 class="font-extrabold text-sm mb-4 flex items-center gap-2 text-purple-700 dark:text-purple-300">
+            <i data-lucide="award" class="w-4 h-4"></i>
+            أوائل الامتحانات (Exam High Scores)
+          </h3>
+          <div id="quiz-leaderboard-list" class="space-y-2 text-xs"></div>
+        </div>
+
+        <!-- Arcade Champions -->
+        <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm">
+          <h3 class="font-extrabold text-sm mb-4 flex items-center gap-2 text-rose-600 dark:text-rose-400">
+            <i data-lucide="gamepad-2" class="w-4 h-4"></i>
+            متصدرو لعبة HTU Run 🏃‍♂️
+          </h3>
+          <div id="game-leaderboard-list" class="space-y-2 text-xs"></div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- VIEW 4: FLASHCARDS 3D -->
+    <section id="view-cards" class="hidden space-y-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-xl font-bold">بطاقات الحفظ السريع (Flashcards)</h2>
+          <p class="text-xs text-slate-500">انقر على البطاقة لقلبها ومعرفة الإجابة</p>
+        </div>
+        <span id="card-counter" class="text-xs font-bold px-3 py-1 bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 rounded-full">
+          1 / 20
+        </span>
+      </div>
+
+      <div class="perspective-1000 max-w-xl mx-auto h-80 cursor-pointer" onclick="flipCurrentCard()">
+        <div id="flashcard-inner" class="relative w-full h-full transform-style-3d transition-transform duration-500 shadow-xl rounded-3xl">
+          <div class="absolute inset-0 bg-white dark:bg-slate-800 border-2 border-purple-200 dark:border-purple-900 rounded-3xl p-8 flex flex-col justify-between backface-hidden">
+            <div class="flex justify-between items-center text-xs font-bold text-purple-600">
+              <span class="flex items-center gap-1.5"><i data-lucide="help-circle" class="w-4 h-4"></i> السؤال</span>
+              <span class="bg-purple-100 dark:bg-purple-950/60 px-2 py-0.5 rounded-md">انقر للعرض</span>
+            </div>
+            <div class="text-center my-auto">
+              <p id="card-question-text" class="text-lg font-bold text-slate-900 dark:text-slate-100"></p>
+            </div>
+            <div class="text-center text-xs text-slate-400">(انقر للقلب)</div>
+          </div>
+
+          <div class="absolute inset-0 bg-gradient-to-tr from-purple-900 to-indigo-900 text-white rounded-3xl p-8 flex flex-col justify-between rotate-y-180 backface-hidden">
+            <div class="flex justify-between items-center text-xs font-bold text-emerald-300">
+              <span class="flex items-center gap-1.5"><i data-lucide="check-circle-2" class="w-4 h-4"></i> الإجابة</span>
+              <span class="bg-emerald-500/20 px-2 py-0.5 rounded-md border border-emerald-400/30">معتمدة</span>
+            </div>
+            <div class="text-center my-auto">
+              <p id="card-answer-text" class="text-lg font-extrabold text-emerald-200"></p>
+            </div>
+            <div class="text-center text-xs text-purple-300">(انقر للعودة)</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-center gap-4 max-w-sm mx-auto pt-2">
+        <button onclick="prevCard()" class="p-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl hover:bg-slate-100 transition-colors shadow-sm">
+          <i data-lucide="chevron-right" class="w-6 h-6"></i>
+        </button>
+        <button onclick="flipCurrentCard()" class="px-6 py-2.5 bg-purple-700 hover:bg-purple-800 text-white font-bold rounded-2xl text-xs shadow-md shadow-purple-600/20">
+          قلب البطاقة
+        </button>
+        <button onclick="nextCard()" class="p-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl hover:bg-slate-100 transition-colors shadow-sm">
+          <i data-lucide="chevron-left" class="w-6 h-6"></i>
+        </button>
+      </div>
+    </section>
+
+    <!-- VIEW 5: CHEAT SHEET -->
+    <section id="view-cheat" class="hidden space-y-6">
+      <div class="relative">
+        <i data-lucide="search" class="w-5 h-5 absolute right-4 top-3.5 text-slate-400"></i>
+        <input type="text" id="cheat-search-input" onkeyup="filterCheatSheet()" placeholder="ابحث في التواريخ، الرتب، الأسلحة، القوانين..." class="w-full pr-12 pl-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs focus:ring-2 focus:ring-purple-600 outline-none shadow-sm">
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm">
+          <h3 class="font-bold text-sm mb-4 text-purple-700 dark:text-purple-300 flex items-center gap-2">
+            <i data-lucide="calendar" class="w-4 h-4"></i> التواريخ المفصلية
+          </h3>
+          <div class="space-y-2 max-h-96 overflow-y-auto scrollbar-thin" id="dates-list"></div>
+        </div>
+        <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm">
+          <h3 class="font-bold text-sm mb-4 text-emerald-600 dark:text-emerald-400 flex items-center gap-2">
+            <i data-lucide="award" class="w-4 h-4"></i> شارات الرتب العسكرية
+          </h3>
+          <div class="space-y-2 max-h-96 overflow-y-auto scrollbar-thin" id="ranks-list"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 6: NOTEBOOK -->
+    <section id="view-notebook" class="hidden space-y-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-xl font-bold flex items-center gap-2">
+            <i data-lucide="book-open" class="w-5 h-5 text-purple-600"></i>
+            دفتر ملاحظات الطالب
+          </h2>
+          <p class="text-xs text-slate-500">حفظ تلقائي محلي بدون إنترنت</p>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="copyNotebookText()" class="px-3 py-1.5 text-xs font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 rounded-xl transition-all flex items-center gap-1.5">
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i> نسخ
+          </button>
+          <button onclick="clearNotebookText()" class="px-3 py-1.5 text-xs font-bold bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 text-rose-600 rounded-xl transition-all">
+            مسح
+          </button>
+        </div>
+      </div>
+      <div class="bg-white dark:bg-slate-800 rounded-3xl p-4 sm:p-6 border border-slate-200 dark:border-slate-700 shadow-sm">
+        <textarea id="student-notebook-area" oninput="saveNotebookText()" rows="12" placeholder="اكتب هنا ملاحظاتك..." class="w-full bg-slate-50 dark:bg-slate-900/60 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 text-xs focus:ring-2 focus:ring-purple-600 outline-none leading-relaxed resize-y scrollbar-thin"></textarea>
+        <div class="flex items-center justify-between text-xs text-slate-400 mt-2">
+          <span id="notebook-status">✓ محفوظ</span>
+          <span id="notebook-char-count">0 حرف</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 7: FEEDBACK -->
+    <section id="view-feedback" class="hidden space-y-6">
+      <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-700 shadow-sm">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-12 h-12 bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 rounded-2xl flex items-center justify-center">
+            <i data-lucide="message-square-plus" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <h2 class="text-xl font-bold">شاركنا اقتراحاتك</h2>
+            <p class="text-xs text-slate-500">نرحب بملاحظاتكم وأفكاركم لتطوير المنصة</p>
+          </div>
+        </div>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">نوع الاقتراح</label>
+            <select id="feedback-type" class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 outline-none">
+              <option value="سؤال جديد أو تصحيح">اقتراح سؤال أو تصحيح معلومة</option>
+              <option value="إضافة مادة جديدة">طلب إضافة مادة أخرى</option>
+              <option value="تطوير لعبة HTU Run">اقتراح للعبة HTU Run</option>
+              <option value="تحسين الموقع">تحسين عام</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">التفاصيل</label>
+            <textarea id="feedback-content" rows="4" placeholder="اكتب اقتراحك هنا..." class="w-full bg-slate-50 dark:bg-slate-900 p-3.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs focus:ring-2 focus:ring-emerald-500 outline-none"></textarea>
+          </div>
+          <div class="flex flex-col sm:flex-row gap-3 pt-2">
+            <button onclick="submitFeedbackLocal()" class="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition-all shadow-md flex items-center justify-center gap-2">
+              <i data-lucide="send" class="w-4 h-4"></i> إرسال الاقتراح
+            </button>
+            <a href="https://www.instagram.com/greenpurplestudios?rpxt=MXF5NGhia3RraGlwbA==" target="_blank" rel="noopener noreferrer" class="px-6 py-3 bg-pink-50 dark:bg-pink-950/40 text-pink-600 hover:bg-pink-100 rounded-xl text-xs font-bold border border-pink-200 dark:border-pink-900/50 flex items-center justify-center gap-2">
+              <i data-lucide="instagram" class="w-4 h-4"></i> تواصل عبر Instagram
+            </a>
+          </div>
+          <div id="feedback-success-msg" class="hidden p-3 bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-300 text-emerald-800 rounded-xl text-xs font-semibold">
+            ✓ شكراً لك! تم استلام اقتراحك بنجاح.
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Mobile Bottom Navigation Bar -->
+  <div class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 px-2 py-2 flex justify-around text-center">
+    <button onclick="switchTab('quiz')" id="mob-nav-quiz" class="flex flex-col items-center gap-1 text-purple-700 dark:text-purple-400 font-bold text-[10px]">
+      <i data-lucide="award" class="w-5 h-5"></i> امتحانات
+    </button>
+    <button onclick="switchTab('game')" id="mob-nav-game" class="flex flex-col items-center gap-1 text-rose-600 font-bold text-[10px]">
+      <i data-lucide="gamepad-2" class="w-5 h-5"></i> HTU Run
+    </button>
+    <button onclick="switchTab('leaderboard')" id="mob-nav-leaderboard" class="flex flex-col items-center gap-1 text-slate-500 font-semibold text-[10px]">
+      <i data-lucide="trophy" class="w-5 h-5"></i> المتصدرون
+    </button>
+    <button onclick="switchTab('cards')" id="mob-nav-cards" class="flex flex-col items-center gap-1 text-slate-500 font-semibold text-[10px]">
+      <i data-lucide="layers" class="w-5 h-5"></i> كاردز
+    </button>
+    <button onclick="switchTab('cheat')" id="mob-nav-cheat" class="flex flex-col items-center gap-1 text-slate-500 font-semibold text-[10px]">
+      <i data-lucide="search" class="w-5 h-5"></i> الدليل
+    </button>
+    <button onclick="switchTab('notebook')" id="mob-nav-notebook" class="flex flex-col items-center gap-1 text-slate-500 font-semibold text-[10px]">
+      <i data-lucide="pen-tool" class="w-5 h-5"></i> نوت
+    </button>
+  </div>
+
+  <!-- Footer -->
+  <footer class="mt-auto border-t border-slate-200 dark:border-slate-800 py-6 text-center text-xs text-slate-500">
+    <div class="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div class="flex items-center gap-2">
+        <span class="font-extrabold text-slate-700 dark:text-slate-300">HTU PrepZone</span>
+        <span>•</span>
+        <span>جميع الحقوق محفوظة © 2026</span>
+      </div>
+      <div class="font-bold text-slate-600 dark:text-slate-400 flex items-center gap-1">
+        made by <a href="https://www.instagram.com/greenpurplestudios?rpxt=MXF5NGhia3RraGlwbA==" target="_blank" rel="noopener noreferrer" class="text-purple-600 dark:text-purple-400 hover:underline">greenpurplestudios</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- MODAL: GUEST PROFILE SETUP -->
+  <div id="modal-profile" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-sm w-full p-6 border border-slate-200 dark:border-slate-700 shadow-2xl">
+      <div class="text-center mb-6">
+        <div class="w-14 h-14 bg-purple-100 dark:bg-purple-900/40 text-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-2 text-2xl" id="profile-modal-avatar">
+          🎓
+        </div>
+        <h3 class="text-base font-black">ملف الطالب (Guest)</h3>
+        <p class="text-xs text-slate-500">اختر اسمك المستعار وأيقونتك</p>
+      </div>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">اسمك المستعار</label>
+          <input type="text" id="guest-name-input" placeholder="مثال: يزن أو مهندس المستقبل" class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs focus:ring-2 focus:ring-purple-600 outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-2">الأفاتار</label>
+          <div class="grid grid-cols-5 gap-2 text-xl text-center">
+            <button onclick="selectAvatar('🎓')" class="p-2 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-purple-500">🎓</button>
+            <button onclick="selectAvatar('⚡')" class="p-2 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-purple-500">⚡</button>
+            <button onclick="selectAvatar('🚀')" class="p-2 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-purple-500">🚀</button>
+            <button onclick="selectAvatar('🛡️')" class="p-2 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-purple-500">🛡️</button>
+            <button onclick="selectAvatar('☕')" class="p-2 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-purple-500">☕</button>
+          </div>
+        </div>
+        <div class="flex gap-2 pt-2">
+          <button onclick="saveGuestProfile()" class="flex-1 py-2.5 bg-purple-700 hover:bg-purple-800 text-white font-bold rounded-xl text-xs transition-colors">
+            حفظ
+          </button>
+          <button onclick="closeProfileModal()" class="px-4 py-2.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-semibold rounded-xl text-xs">
+            إلغاء
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: ADMIN ACCESS (SHA-256 ENCRYPTED) -->
+  <div id="modal-admin" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-md w-full p-6 border border-slate-200 dark:border-slate-700 shadow-2xl">
+      <div id="admin-login-state">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-950/60 text-purple-700 flex items-center justify-center">
+            <i data-lucide="lock" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold">بوابة المسؤول (Admin Access)</h3>
+            <p class="text-[11px] text-slate-500">مشفرة برمجياً عبر تجزئة SHA-256</p>
+          </div>
+        </div>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">رمز المرور الخاص</label>
+            <input type="password" id="admin-pass-input" placeholder="••••••••••••" class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs focus:ring-2 focus:ring-purple-600 outline-none">
+          </div>
+          <p id="admin-error-msg" class="text-rose-500 text-xs hidden">رمز المرور غير صحيح!</p>
+          <div class="flex gap-2">
+            <button onclick="verifyAdminPass()" class="flex-1 py-2.5 bg-purple-700 hover:bg-purple-800 text-white font-bold rounded-xl text-xs transition-colors">دخول</button>
+            <button onclick="closeAdminModal()" class="px-4 py-2.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-semibold rounded-xl text-xs">إغلاق</button>
+          </div>
+        </div>
+      </div>
+      <div id="admin-dashboard-state" class="hidden space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-3">
+          <span class="text-xs font-black text-emerald-600 flex items-center gap-1.5">
+            <i data-lucide="check-circle" class="w-4 h-4"></i> لوحة الإدارة مفعّلة
+          </span>
+          <button onclick="logoutAdmin()" class="text-xs text-rose-500 hover:underline">خروج</button>
+        </div>
+        <div class="p-3 bg-purple-50 dark:bg-purple-950/40 rounded-xl border border-purple-200 dark:border-purple-800 text-purple-900 dark:text-purple-200 text-xs">
+          الإدارة والأسئلة محصورة برمجياً لحماية المنصة من التلاعب.
+        </div>
+        <div class="border border-slate-200 dark:border-slate-700 rounded-xl p-3">
+          <h4 class="font-bold text-xs mb-2">اقتراحات الطلاب المستلمة:</h4>
+          <div id="admin-feedback-list" class="max-h-36 overflow-y-auto space-y-2 text-[11px] scrollbar-thin"></div>
+        </div>
+        <button onclick="exportQuestionsJSON()" class="w-full py-2.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-200 font-bold rounded-xl text-xs flex items-center justify-center gap-2">
+          <i data-lucide="download" class="w-4 h-4"></i> تحميل بنك الأسئلة (JSON)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    const ENCRYPTED_ADMIN_HASH = "80f8373b5065e8a757530438b4f738012aa442ec9079a4ec291244e13589c3bc";
+
+    async function sha256(message) {
+      const msgBuffer = new TextEncoder().encode(message);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    const QUESTION_BANK = [
+      { id: 1, q: "متى وقعت معركة الكرامة الخالدة؟", options: ["21 آذار 1968", "25 أيار 1946", "1 آذار 1956", "15 أيار 1948"], correct: 0, explanation: "وقعت معركة الكرامة في 21 آذار 1968 وحقق فيها الجيش العربي نصراً مؤزراً." },
+      { id: 2, q: "ما هو السلاح الذي يعتبر 'سلاح الهجوم' في القوات المسلحة الأردنية؟", options: ["سلاح الدروع الملكي", "سلاح المشاة", "سلاح المدفعية الملكي", "سلاح الصيانة الملكي"], correct: 0, explanation: "سلاح الدروع الملكي هو سلاح الهجوم الرئيسي في الجيش العربي الأردني." },
+      { id: 3, q: "أين يقع صرح مستشفى الملكة رانيا العبدالله للأطفال؟", options: ["عمان", "إربد", "الزرقاء", "العقبة"], correct: 0, explanation: "يقع مستشفى الملكة رانيا العبدالله للأطفال في العاصمة عمان داخل المدينة الطبية." },
+      { id: 4, q: "في أي عام تم تعريب قيادة الجيش العربي وطرد كلوب باشا؟", options: ["1 آذار 1956", "25 أيار 1946", "11 نيسان 1921", "13 تموز 2006"], correct: 0, explanation: "تم تعريب قيادة الجيش في 1 آذار 1956 بقرار المغفور له الملك الحسين بن طلال." },
+      { id: 5, q: "السلاح المسؤول عن إدامة الاتصالات مع السفارات في الخارج هو:", options: ["سلاح اللاسلكي الملكي", "سلاح الهندسة الملكي", "مديرية العمليات الحربية", "سلاح الجو الملكي"], correct: 0, explanation: "سلاح اللاسلكي الملكي من واجباته تأمين الاتصالات السلكية واللاسلكية بالسفارات." },
+      { id: 6, q: "تأسست دائرة المخابرات العامة الأردنية بموجب القانون رقم (24) لسنة:", options: ["1964", "1956", "1974", "1999"], correct: 0, explanation: "تأسست دائرة المخابرات العامة بقانون رقم 24 لسنة 1964." },
+      { id: 7, q: "ما هي الرتبة العسكرية التي شارتها 'سيفان متقاطعان ونجمة سباعية'؟", options: ["لواء", "عميد", "فريق", "فريق أول"], correct: 0, explanation: "شارة رتبة اللواء هي سيفان متقاطعان ونجمة سباعية." },
+      { id: 8, q: "رتبة 'مقدم' في القوات المسلحة الأردنية تتكون من:", options: ["نجمة سباعية يعلوها التاج الهاشمي", "التاج الهاشمي فقط", "ثلاث نجوم سباعية", "سيفان متقاطعان وتاج"], correct: 0, explanation: "شارة المقدم نجمة سباعية واحدة يعلوها التاج الهاشمي." },
+      { id: 9, q: "تاريخ إعلان استقلال المملكة الأردنية الهاشمية هو:", options: ["25 أيار 1946", "11 نيسان 1921", "20 تموز 1951", "11 آب 1952"], correct: 0, explanation: "أُعلن استقلال المملكة في 25 أيار 1946." },
+      { id: 10, q: "تأسست إمارة شرق الأردن وتم تشكيل القوة السيارة في عام:", options: ["1921", "1916", "1923", "1946"], correct: 0, explanation: "تأسست الإمارة وتشكيل القوة السيارة عام 1921." },
+      { id: 11, q: "في أي عام أطلق الأمير عبد الله الأول اسم 'الجيش العربي' على القوات المسلحة؟", options: ["1923", "1921", "1948", "1956"], correct: 0, explanation: "أُطلق اسم الجيش العربي على القوات المسلحة الأردنية عام 1923." },
+      { id: 12, q: "المادة الدستورية التي تنص على أن 'الأردنيين أمام القانون سواء لا تمييز بينهم':", options: ["المادة (6)", "المادة (127)", "المادة (24)", "المادة (1)"], correct: 0, explanation: "المادة 6 من الدستور تنص على المساواة التامة بين الأردنيين." },
+      { id: 13, q: "رتبة 'رائد' في الجيش العربي الأردني تتكون من:", options: ["التاج الهاشمي فقط", "نجمة سباعية وتاج", "نجمتان سباعيتان", "سيفان متقاطعان"], correct: 0, explanation: "شارة الرائد هي التاج الهاشمي فقط." },
+      { id: 14, q: "في أي عام تم إلغاء المعاهدة الأردنية البريطانية وجلاء القوات؟", options: ["1957", "1956", "1964", "1948"], correct: 0, explanation: "تم إلغاء المعاهدة البريطانية عام 1957." },
+      { id: 15, q: "تم تشكيل أول حكومة في عهد الإمارة (مجلس المشاورين) في:", options: ["11 نيسان 1921", "25 أيار 1923", "1 نيسان 1923", "7 شباط 1928"], correct: 0, explanation: "تشكلت أول حكومة بإمارة شرق الأردن في 11 نيسان 1921." },
+      { id: 16, q: "أنشئت مؤسسة المتقاعدين العسكريين والمحاربين القدماء بموجب قانون عام:", options: ["1974", "1964", "1982", "1994"], correct: 0, explanation: "أنشئت المؤسسة عام 1974 وصدر قانونها المعدل رقم 26 عام 1977." },
+      { id: 17, q: "بدأ تجنيد الجامعيات كضابطات ومجندات في القيادة العامة في عام:", options: ["1973", "1950", "1968", "1985"], correct: 0, explanation: "بدأ تجنيد الجامعيات في القيادة العامة عام 1973." },
+      { id: 18, q: "بدأت المرأة الأردنية العمل في القوات المسلحة كمعلمة في الثقافة العسكرية عام:", options: ["1950", "1960", "1973", "1948"], correct: 0, explanation: "انطلق عمل المرأة العسكرية عام 1950 في مديرية الثقافة العسكرية." },
+      { id: 19, q: "ما هو المركز الدفاعي الذي تأسس عام 1999 (KADDB / حالياً JODDB)؟", options: ["المركز الأردني للتصميم والتطوير", "مركز إدارة الأزمات", "المركز الجغرافي الملكي", "معهد التكنولوجيا"], correct: 0, explanation: "تأسس مركز التصميم والتطوير عام 1999." },
+      { id: 20, q: "تأسست أول نواة لسلاح الجو الملكي الأردني عام:", options: ["1948", "1956", "1968", "1921"], correct: 0, explanation: "تأسست نواة سلاح الجو الملكي عام 1948 بالتزامن مع حرب فلسطين." },
+      { id: 21, q: "العبارة المطرزة في وسط الكردون بشعار المملكة هي:", options: ["ملك المملكة الأردنية الهاشمية", "الراجي من الله التوفيق والعون", "عبد الله الثاني ابن الحسين بن عون", "الجيش العربي"], correct: 0, explanation: "يتوسط الشريط الأصفر عبارة: 'ملك المملكة الأردنية الهاشمية'." },
+      { id: 22, q: "العبارة المطرزة على الجهة اليمنى من شريط شعار المملكة الأردنية هي:", options: ["الراجي من الله التوفيق والعون", "ملك المملكة الأردنية الهاشمية", "عبد الله الثاني ابن الحسين بن عون", "الثورة العربية"], correct: 0, explanation: "الجهة اليمنى للشريط مطرز عليها: 'الراجي من الله التوفيق والعون'." },
+      { id: 23, q: "لون طائر العقاب في شعار المملكة يرمز إلى:", options: ["راية وعمامة الرسول محمد ﷺ", "خصوبة الأرض", "السماء الصافية", "شجاعة الفرسان"], correct: 0, explanation: "يرمز لون العقاب لراية وعمامة النبي الأعظم محمد ﷺ." },
+      { id: 24, q: "الكرة الأرضية الزرقاء في شعار المملكة ترمز إلى:", options: ["انتشار الإسلام وحضارته في المعمورة", "السلام الدولي", "الحدود المائية للأردن", "الموقع الجغرافي"], correct: 0, explanation: "ترمز الكرة الأرضية لانتشار الإسلام وحضارته." },
+      { id: 25, q: "السيفان المتقاطعان في شعار الجيش العربي يرمزان إلى:", options: ["القوة والمنعة في هذا البلد الآمن", "الخير والعطاء", "النظام الملكي الوراثي", "التضحية"], correct: 0, explanation: "السيفان يرمزان للقوة والمنعة والجاهزية." },
+      { id: 26, q: "السنبلتان في شعار الجيش العربي هما رمز لـ:", options: ["الخير والعطاء السماوي والقمح", "السلام والمحبة", "القوة العسكرية", "الوحدة العربية"], correct: 0, explanation: "السنبلتان رمز للخير والعطاء والقمح." },
+      { id: 27, q: "تستمد الراية الهاشمية لونها العنابي من راية:", options: ["الشريف أبي نمي والشريف الحسين بن علي", "الراية العباسية", "الراية الأموية", "فتح مكة"], correct: 0, explanation: "تستمد لونها من راية الشريف أبي نمي والشريف الحسين بن علي." },
+      { id: 28, q: "تعتبر رتبة المشير أعلى الرتب العسكرية ويرتديها جلالة الملك بصفته:", options: ["القائد الأعلى للقوات المسلحة", "رئيس أركان الجيش", "وزير الدفاع", "القائد الميداني"], correct: 0, explanation: "المشير رتبة القائد الأعلى للقوات المسلحة." },
+      { id: 29, q: "تأسست قيادة القوة البحرية والزوارق الملكية لأول مرة عام:", options: ["1951", "1948", "1967", "2006"], correct: 0, explanation: "تأسست القوة البحرية والزوارق الملكية في العقبة عام 1951." },
+      { id: 30, q: "افتتح جلالة الملك عبد الله الثاني قاعدة الأمير هاشم البحرية الجديدة في:", options: ["13 تموز 2006", "11 نيسان 2000", "25 أيار 2010", "1 آذار 2005"], correct: 0, explanation: "افتتحت قاعدة الأمير هاشم البحرية في العقبة بتاريخ 13 تموز 2006." },
+      { id: 31, q: "بدأ تدريس مادة العلوم العسكرية لأول مرة في الجامعة الأردنية عام:", options: ["1968", "1974", "1994", "1956"], correct: 0, explanation: "بدأ التدريس اختيارياً بالجامعة الأردنية عام 1968." },
+      { id: 32, q: "صدر قرار شمول كافة الجامعات بتدريس العلوم العسكرية كمتطلب إجباري عام:", options: ["1994", "1985", "1999", "1973"], correct: 0, explanation: "صدر قرار الشمول الإجباري لكافة الجامعات عام 1994." },
+      { id: 33, q: "شارة رتبة 'عميد' في القوات المسلحة تتكون من:", options: ["ثلاث نجوم سباعية يعلوها التاج الهاشمي", "نجمتان سباعيتان وتاج", "سيفان متقاطعان وتاج", "نجمة سباعية وتاج"], correct: 0, explanation: "رتبة العميد تتكون من 3 نجوم سباعية يعلوها التاج الهاشمي." },
+      { id: 34, q: "شارة رتبة 'عقيد' في القوات المسلحة تتكون من:", options: ["نجمتان سباعيتان يعلوهما التاج الهاشمي", "ثلاث نجوم وتاج", "تاج فقط", "نجمة وتاج"], correct: 0, explanation: "رتبة العقيد تتكون من نجمتين سباعيتين يعلوهما التاج الهاشمي." },
+      { id: 35, q: "شارة رتبة 'فريق' في القوات المسلحة تتكون من:", options: ["سيفان متقاطعان يعلوهما التاج الهاشمي", "سيفان متقاطعان ونجمة", "سيفان ونجمة وتاج", "ثلاث نجوم وسيفان"], correct: 0, explanation: "رتبة الفريق سيفان متقاطعان يعلوهما التاج الهاشمي." },
+      { id: 36, q: "شارة رتبة 'فريق أول' تتكون من:", options: ["سيفان متقاطعان ونجمة سباعية يعلوهما التاج", "سيفان متقاطعان ونجمتان", "سيفان وتاج فقط", "ثلاث نجوم وتاج"], correct: 0, explanation: "الفريق أول سيفان متقاطعان ونجمة سباعية يعلوهما التاج الهاشمي." },
+      { id: 37, q: "شارة رتبة 'رقيب أول' للأفراد هي:", options: ["ثلاثة أشرطة يعلوها التاج على الذراع", "ثلاثة أشرطة فقط", "شريطان على الذراع", "شريط واحد وتاج"], correct: 0, explanation: "الرقيب أول يحمل 3 أشرطة يعلوها التاج على الذراع." },
+      { id: 38, q: "قبل تأسيس المخابرات العامة عام 1964، كانت المهام الاستخبارية تسند إلى:", options: ["أجهزة الشرطة والقوات المسلحة", "الأمن الدبلوماسي", "الحرس السري", "وزارة العدل"], correct: 0, explanation: "كانت تسند لأجهزة الشرطة والقوات المسلحة." },
+      { id: 39, q: "تنص المادة (127) من الدستور على أن تعيين مدير عام المخابرات يتم بإرادة من:", options: ["جلالة الملك المعظم", "رئيس مجلس النواب", "وزير الداخلية", "رئيس هيئة الأركان"], correct: 0, explanation: "يعين ويعزل بإرادة ملكية سامية من جلالة الملك مباشرة." },
+      { id: 40, q: "من مشاريع مؤسسة المتقاعدين لنقل المسافرين من وإلى المطار:", options: ["تكسي مطار الملكة علياء الدولي", "باصات جت", "حافلات الكرامة", "تكسي العاصمة"], correct: 0, explanation: "تكسي مطار الملكة علياء استثمار للمتقاعدين العسكريين." },
+      { id: 41, q: "محطة المعرفة التابعة لمؤسسة المتقاعدين العسكريين تعقد دورات في:", options: ["الحاسوب وتكنولوجيا المعلومات والبريد الإلكتروني", "الميكانيك والكهرباء", "الزراعة المحمية", "التصوير الميداني"], correct: 0, explanation: "تعقد دورات الحاسوب والإنترنت والبريد الإلكتروني بالمقابلين." },
+      { id: 42, q: "أول مجلس شورى في عهد الإمارة تأسس في تاريخ:", options: ["1 نيسان 1923", "11 نيسان 1921", "25 أيار 1946", "6 أيلول 1951"], correct: 0, explanation: "تأسس أول مجلس شورى في 1 نيسان 1923." },
+      { id: 43, q: "تولى الملك طلال بن عبد الله سلطاته الدستورية في:", options: ["6 أيلول 1951", "20 تموز 1951", "11 آب 1952", "25 أيار 1946"], correct: 0, explanation: "نودي بالملك طلال ملكاً في 6 أيلول 1951." },
+      { id: 44, q: "أقسم جلالة الملك عبد الله الثاني اليمين الدستورية ملكاً للأردن في:", options: ["7 شباط 1999", "11 آب 1952", "1 آذار 1999", "25 أيار 1999"], correct: 0, explanation: "أقسم جلالة الملك عبد الله الثاني اليمين الدستورية في 7 شباط 1999." },
+      { id: 45, q: "المجلة العسكرية الشهرية الصادرة عن التوجيه المعنوي بالقوات المسلحة:", options: ["مجلة الأقصى", "مجلة اليرموك", "مجلة الجيش", "مجلة الكرامة"], correct: 0, explanation: "يصدر التوجيه المعنوي مجلة الأقصى." },
+      { id: 46, q: "البرنامج الإعلامي الإذاعي والتلفزيوني الخاص بالقوات المسلحة يحمل اسم:", options: ["جيشنا العربي", "صوت المعركة", "حماة الوطن", "درع المملكة"], correct: 0, explanation: "البرنامج الإعلامي الشهير هو 'جيشنا العربي'." },
+      { id: 47, q: "سلاح الصيانة الملكي تأسس مع تأسيس إمارة شرق الأردن في عام:", options: ["1921", "1948", "1968", "1956"], correct: 0, explanation: "تأسس سلاح الصيانة الملكي عام 1921." },
+      { id: 48, q: "تسهم المؤسسة الاستهلاكية العسكرية في التنمية الوطنية من خلال:", options: ["كبح جماح ارتفاع الأسعار وتوفير مخزون استراتيجي", "تصدير السلاح", "بناء السدود", "طباعة الكتب"], correct: 0, explanation: "تسهم في ضبط الأسعار وتوفير مخزون غذائي استراتيجي." },
+      { id: 49, q: "المركز الإقليمي لتدريس علوم وفضاء غرب آسيا التابع للأمم المتحدة يتعاون مع:", options: ["المركز الجغرافي الملكي الأردني", "جامعة اليرموك", "وزارة التخطيط", "الأمن العام"], correct: 0, explanation: "يتعاون مع المركز الجغرافي الملكي الأردني." },
+      { id: 50, q: "مشروع مؤسسة المتقاعدين العسكريين لإنتاج العسل الطبيعي يعرف بـ:", options: ["مزرعة النحل", "مزرعة المنشية", "مجمع المقابلين", "مزرعة خو"], correct: 0, explanation: "مشروع مزرعة النحل لإنتاج العسل الطبيعي." },
+      { id: 51, q: "من أصناف سلاح المشاة في القوات المسلحة الأردنية:", options: ["المشاة الراجلة وقوات الصاعقة وقوات المظليين", "سلاح الجو والدفاع الجوي", "الفرسان والمدفعية الثقيلة", "القوة البحرية"], correct: 0, explanation: "يضم سلاح المشاة المشاة الراجلة والصاعقة والمظليين." },
+      { id: 52, q: "في شعار المملكة، الترس البرونزي مزركش بزهرة:", options: ["زهرة الأقحوان", "السوسنة السوداء", "الدحنون", "الياسمين"], correct: 0, explanation: "مزركش بزهرة الأقحوان المستعملة في الزخرفة العربية." },
+      { id: 53, q: "استشهد الملك المؤسس عبد الله الأول في القدس الشريف بتاريخ:", options: ["20 تموز 1951", "25 أيار 1946", "11 آب 1952", "1 آذار 1956"], correct: 0, explanation: "استشهد الملك المؤسس في 20 تموز 1951 بالمسجد الأقصى." },
+      { id: 54, q: "النسبة المئوية للمواطنين في الأردن الذين تقل أعمارهم عن 15 سنة:", options: ["40%", "20%", "60%", "10%"], correct: 0, explanation: "الأردن مجتمع فتي حيث 40% من سكانه دون سن الـ 15." },
+      { id: 55, q: "تولى الملك الحسين بن طلال سلطاته الدستورية في:", options: ["11 آب 1952", "6 أيلول 1951", "25 أيار 1946", "1 آذار 1956"], correct: 0, explanation: "تولى المغفور له الملك الحسين سلطاته الدستورية في 11 آب 1952." }
+    ];
+
+    const FLASHCARDS = [
+      { q: "متى وقعت معركة الكرامة الخالدة؟", a: "21 آذار 1968" },
+      { q: "ما هو السلاح المعتمد كسلاح هجومي في الجيش؟", a: "سلاح الدروع الملكي" },
+      { q: "متى تم تعريب قيادة الجيش الأردني؟", a: "1 آذار 1956" },
+      { q: "أين يقع مستشفى الملكة رانيا للأطفال؟", a: "العاصمة عمّان (المدينة الطبية)" },
+      { q: "ما هو السلاح المسؤول عن الاتصال بالسفارات؟", a: "سلاح اللاسلكي الملكي" },
+      { q: "متى تأسست دائرة المخابرات العامة الأردنية؟", a: "عام 1964 (بموجب قانون رقم 24)" },
+      { q: "ما هي شارة رتبة اللواء؟", a: "سيفان متقاطعان ونجمة سباعية" },
+      { q: "ما هي شارة رتبة المقدم؟", a: "نجمة سباعية يعلوها التاج الهاشمي" },
+      { q: "ما هي شارة رتبة الرائد؟", a: "التاج الهاشمي فقط" },
+      { q: "ما هي شارة رتبة العميد؟", a: "ثلاث نجوم سباعية يعلوها التاج الهاشمي" },
+      { q: "تاريخ إعلان استقلال المملكة؟", a: "25 أيار 1946" },
+      { q: "تاريخ أول حكومة في عهد الإمارة؟", a: "11 نيسان 1921 (مجلس المشاورين)" },
+      { q: "متى بدأ تجنيد الجامعيات في القيادة العامة؟", a: "عام 1973" },
+      { q: "متى تأسست مؤسسة المتقاعدين العسكريين؟", a: "عام 1974" },
+      { q: "تاريخ استشهاد الملك المؤسس عبد الله الأول؟", a: "20 تموز 1951" },
+      { q: "متى أقسم جلالة الملك عبد الله الثاني اليمين الدستورية؟", a: "7 شباط 1999" },
+      { q: "ما دلالة السيفين المتقاطعين في شعار الجيش؟", a: "القوة والمنعة" },
+      { q: "ما دلالة السنبلتين في شعار الجيش؟", a: "الخير والعطاء والقمح" },
+      { q: "دلالة طائر العقاب في شعار المملكة؟", a: "القوة والمنعة وراية وعمامة النبي ﷺ" },
+      { q: "العبارة المطرزة وسط كردون الشعار؟", a: "ملك المملكة الأردنية الهاشمية" }
+    ];
+
+    const CHEAT_DATES = [
+      { date: "11 نيسان 1921", title: "تشكيل أول وزارة في عهد الإمارة (مجلس المشاورين)" },
+      { date: "1 نيسان 1923", title: "تأسيس أول مجلس شورى في الإمارة" },
+      { date: "25 أيار 1946", title: "إعلان استقلال المملكة الأردنية الهاشمية" },
+      { date: "20 تموز 1951", title: "استشهاد الملك المؤسس عبد الله الأول في القدس" },
+      { date: "6 أيلول 1951", title: "تولي الملك طلال بن عبد الله سلطاته الدستورية" },
+      { date: "11 آب 1952", title: "تولي الملك الحسين بن طلال سلطاته الدستورية" },
+      { date: "1 آذار 1956", title: "تعريب قيادة الجيش العربي وطرد كلوب باشا" },
+      { date: "21 آذار 1968", title: "معركة الكرامة الخالدة ونصر الجيش العربي" },
+      { date: "7 شباط 1999", title: "أداء جلالة الملك عبد الله الثاني اليمين الدستورية" },
+      { date: "13 تموز 2006", title: "افتتاح قاعدة الأمير هاشم البحرية الجديدة بالعقبة" },
+      { date: "عام 1923", title: "إطلاق اسم «الجيش العربي» على القوات المسلحة" },
+      { date: "عام 1957", title: "إلغاء المعاهدة الأردنية البريطانية وجلاء القوات" },
+      { date: "عام 1964", title: "تأسيس دائرة المخابرات العامة بقانون رقم 24" },
+      { date: "عام 1973", title: "بدء تجنيد الجامعيات كضابطات ومجندات" },
+      { date: "عام 1974", title: "تأسيس مؤسسة المتقاعدين العسكريين والمحاربين القدماء" },
+      { date: "عام 1994", title: "شمول كافة الجامعات بإجبارية العلوم العسكرية" },
+      { date: "عام 1999", title: "تأسيس مركز KADDB للتصميم والتطوير" }
+    ];
+
+    const CHEAT_RANKS = [
+      { rank: "ملازم", badge: "نجمة سباعية واحدة على الكتف" },
+      { rank: "ملازم أول", badge: "نجمتان سباعيتان على الكتف" },
+      { rank: "نقيب", badge: "ثلاث نجوم سباعية على الكتف" },
+      { rank: "رائد", badge: "التاج الهاشمي فقط" },
+      { rank: "مقدم", badge: "نجمة سباعية يعلوها التاج الهاشمي" },
+      { rank: "عقيد", badge: "نجمتان سباعيتان يعلوهما التاج" },
+      { rank: "عميد", badge: "ثلاث نجوم سباعية يعلوها التاج" },
+      { rank: "لواء", badge: "سيفان متقاطعان ونجمة سباعية" },
+      { rank: "فريق", badge: "سيفان متقاطعان والتاج الهاشمي" },
+      { rank: "فريق أول", badge: "سيفان متقاطعان ونجمة سباعية وتاج" },
+      { rank: "مشير", badge: "سيفان وسنبلتا غار وتاج (القائد الأعلى)" },
+      { rank: "رقيب أول", badge: "ثلاثة أشرطة يعلوها التاج على الذراع" },
+      { rank: "رقيب", badge: "ثلاثة أشرطة على الذراع" },
+      { rank: "عريف", badge: "شريطان على الذراع" },
+      { rank: "جندي أول", badge: "شريط واحد على الذراع" }
+    ];
+
+    let currentQuizQuestions = [];
+    let currentQuestionIdx = 0;
+    let studentAnswers = {};
+    let quizInterval = null;
+    let timeLeft = 900;
+    let quizMode = 'standard';
+    let currentCardIdx = 0;
+    let isCardFlipped = false;
+    let selectedAvatarChar = '🎓';
+
+    function shuffleArray(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('total-q-count').innerText = QUESTION_BANK.length;
+      loadGuestProfile();
+      updateMistakesUI();
+      renderCheatSheet();
+      loadNotebook();
+      updateFlashcardView();
+      renderLeaderboard();
+      initGame();
+      lucide.createIcons();
+    });
+
+    function toggleDarkMode() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem('htu_prep_theme', isDark ? 'dark' : 'light');
+      updateThemeIcon(isDark);
+    }
+    function updateThemeIcon(isDark) {
+      const icon = document.getElementById('theme-icon');
+      if (icon) {
+        icon.setAttribute('data-lucide', isDark ? 'sun' : 'moon');
+        lucide.createIcons();
+      }
+    }
+    if (localStorage.getItem('htu_prep_theme') === 'dark') {
+      document.documentElement.classList.add('dark');
+    }
+
+    function switchTab(tabId) {
+      const views = ['quiz', 'game', 'leaderboard', 'cards', 'cheat', 'notebook', 'feedback'];
+      views.forEach(v => {
+        const el = document.getElementById(`view-${v}`);
+        if (el) el.classList.add('hidden');
+        const navBtn = document.getElementById(`nav-btn-${v}`);
+        if (navBtn) {
+          navBtn.classList.remove('bg-white', 'dark:bg-slate-800', 'text-purple-700', 'dark:text-purple-300', 'text-rose-600', 'shadow-sm');
+          navBtn.classList.add('text-slate-600', 'dark:text-slate-300');
+        }
+        const mobBtn = document.getElementById(`mob-nav-${v}`);
+        if (mobBtn) {
+          mobBtn.classList.remove('text-purple-700', 'dark:text-purple-400', 'text-rose-600');
+          mobBtn.classList.add('text-slate-500');
+        }
+      });
+
+      const activeEl = document.getElementById(`view-${tabId}`);
+      if (activeEl) activeEl.classList.remove('hidden');
+
+      const activeNav = document.getElementById(`nav-btn-${tabId}`);
+      if (activeNav) {
+        activeNav.classList.add('bg-white', 'dark:bg-slate-800', tabId === 'game' ? 'text-rose-600' : 'text-purple-700', 'dark:text-purple-300', 'shadow-sm');
+        activeNav.classList.remove('text-slate-600', 'dark:text-slate-300');
+      }
+
+      const activeMob = document.getElementById(`mob-nav-${tabId}`);
+      if (activeMob) {
+        activeMob.classList.add(tabId === 'game' ? 'text-rose-600' : 'text-purple-700', 'dark:text-purple-400');
+        activeMob.classList.remove('text-slate-500');
+      }
+
+      if (tabId === 'leaderboard') renderLeaderboard();
+      lucide.createIcons();
+    }
+
+    function getStoredMistakeIds() {
+      return JSON.parse(localStorage.getItem('htu_user_mistakes') || '[]');
+    }
+
+    function recordMistake(qId) {
+      let mistakes = getStoredMistakeIds();
+      if (!mistakes.includes(qId)) {
+        mistakes.push(qId);
+        localStorage.setItem('htu_user_mistakes', JSON.stringify(mistakes));
+      }
+      updateMistakesUI();
+    }
+
+    function removeMistake(qId) {
+      let mistakes = getStoredMistakeIds();
+      mistakes = mistakes.filter(id => id !== qId);
+      localStorage.setItem('htu_user_mistakes', JSON.stringify(mistakes));
+      updateMistakesUI();
+    }
+
+    function updateMistakesUI() {
+      const mistakes = getStoredMistakeIds();
+      const badge = document.getElementById('mistakes-count-badge');
+      const btn = document.getElementById('btn-start-mistakes');
+      if (badge) badge.innerText = `${mistakes.length} خطأ`;
+      if (btn) btn.disabled = (mistakes.length === 0);
+    }
+
+    function startStandardQuiz() {
+      quizMode = 'standard';
+      const shuffled = shuffleArray(QUESTION_BANK).slice(0, 15);
+      setupQuizEngine(shuffled, 900, "كويز شامل");
+    }
+
+    function startMistakesQuiz() {
+      const mistakeIds = getStoredMistakeIds();
+      if (mistakeIds.length === 0) return;
+      quizMode = 'mistakes';
+      const mistakesList = QUESTION_BANK.filter(q => mistakeIds.includes(q.id));
+      setupQuizEngine(shuffleArray(mistakesList), 600, "مراجعة الأخطاء");
+    }
+
+    function startSuddenDeathQuiz() {
+      quizMode = 'sudden_death';
+      const shuffled = shuffleArray(QUESTION_BANK);
+      setupQuizEngine(shuffled, 20, "التحدي القاتل 🔥");
+    }
+
+    function setupQuizEngine(questions, durationSecs, modeName) {
+      currentQuizQuestions = questions.map(item => {
+        const originalCorrectText = item.options[item.correct];
+        const shuffledOpts = shuffleArray(item.options);
+        return {
+          id: item.id,
+          q: item.q,
+          options: shuffledOpts,
+          correct: shuffledOpts.indexOf(originalCorrectText),
+          explanation: item.explanation
+        };
+      });
+
+      studentAnswers = {};
+      currentQuestionIdx = 0;
+      timeLeft = durationSecs;
+
+      document.getElementById('quiz-mode-tag').innerText = modeName;
+      document.getElementById('quiz-intro-box').classList.add('hidden');
+      document.getElementById('quiz-result-box').classList.add('hidden');
+      document.getElementById('quiz-active-box').classList.remove('hidden');
+
+      startQuizTimer();
+      renderCurrentQuestion();
+    }
+
+    function startQuizTimer() {
+      clearInterval(quizInterval);
+      quizInterval = setInterval(() => {
+        timeLeft--;
+        const mins = Math.floor(timeLeft / 60);
+        const secs = timeLeft % 60;
+        document.getElementById('quiz-timer').innerText = 
+          `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+
+        if (timeLeft <= 0) {
+          clearInterval(quizInterval);
+          if (quizMode === 'sudden_death') {
+            alert("⏰ انتهى الوقت! خطأ في التحدي القاتل!");
+            finishQuiz();
+          } else {
+            finishQuiz();
+          }
+        }
+      }, 1000);
+    }
+
+    function renderCurrentQuestion() {
+      const qData = currentQuizQuestions[currentQuestionIdx];
+      document.getElementById('q-progress-text').innerText = `${currentQuestionIdx + 1} / ${currentQuizQuestions.length}`;
+      document.getElementById('current-question-text').innerText = qData.q;
+
+      const optsBox = document.getElementById('options-container');
+      optsBox.innerHTML = '';
+      const letters = ['أ', 'ب', 'ج', 'د'];
+
+      qData.options.forEach((opt, idx) => {
+        const isChosen = studentAnswers[currentQuestionIdx] === idx;
+        const btn = document.createElement('button');
+        btn.onclick = () => selectQuizAnswer(idx);
+        btn.className = `w-full text-right p-4 rounded-xl border text-xs font-semibold transition-all flex items-center justify-between ${
+          isChosen 
+            ? 'bg-purple-50 dark:bg-purple-950/50 border-purple-600 text-purple-900 dark:text-purple-200 ring-2 ring-purple-600/30' 
+            : 'bg-slate-50 hover:bg-slate-100 dark:bg-slate-700/50 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-600'
+        }`;
+
+        btn.innerHTML = `
+          <div class="flex items-center gap-3">
+            <span class="w-6 h-6 rounded-lg ${isChosen ? 'bg-purple-600 text-white' : 'bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-300'} font-bold flex items-center justify-center">${letters[idx]}</span>
+            <span>${opt}</span>
+          </div>
+          ${isChosen ? '<i data-lucide="check" class="w-4 h-4 text-purple-600"></i>' : ''}
+        `;
+        optsBox.appendChild(btn);
+      });
+
+      document.getElementById('btn-prev-q').disabled = (currentQuestionIdx === 0 || quizMode === 'sudden_death');
+      document.getElementById('btn-next-q').innerText = currentQuestionIdx === currentQuizQuestions.length - 1 ? 'تسليم' : 'التالي';
+      lucide.createIcons();
+    }
+
+    function selectQuizAnswer(optIdx) {
+      studentAnswers[currentQuestionIdx] = optIdx;
+      
+      if (quizMode === 'sudden_death') {
+        const currentQ = currentQuizQuestions[currentQuestionIdx];
+        if (optIdx !== currentQ.correct) {
+          recordMistake(currentQ.id);
+          alert("💀 إجابة خاطئة! انتهى التحدي القاتل!");
+          finishQuiz();
+          return;
+        } else {
+          removeMistake(currentQ.id);
+          if (currentQuestionIdx < currentQuizQuestions.length - 1) {
+            currentQuestionIdx++;
+            timeLeft = 20;
+            renderCurrentQuestion();
+          } else {
+            finishQuiz();
+          }
+          return;
+        }
+      }
+
+      renderCurrentQuestion();
+    }
+
+    function nextQuestion() {
+      if (currentQuestionIdx < currentQuizQuestions.length - 1) {
+        currentQuestionIdx++;
+        renderCurrentQuestion();
+      } else {
+        finishQuiz();
+      }
+    }
+
+    function prevQuestion() {
+      if (currentQuestionIdx > 0 && quizMode !== 'sudden_death') {
+        currentQuestionIdx--;
+        renderCurrentQuestion();
+      }
+    }
+
+    function abortQuiz() {
+      if (confirm("هل تريد إنهاء الاختبار وحساب النتيجة الحالية؟")) {
+        finishQuiz();
+      }
+    }
+
+    function finishQuiz() {
+      clearInterval(quizInterval);
+      let score = 0;
+      const totalAnswered = Object.keys(studentAnswers).length;
+
+      currentQuizQuestions.forEach((q, idx) => {
+        if (studentAnswers[idx] === q.correct) {
+          score++;
+          if (quizMode === 'mistakes') removeMistake(q.id);
+        } else if (studentAnswers[idx] !== undefined) {
+          recordMistake(q.id);
+        }
+      });
+
+      const totalPossible = (quizMode === 'sudden_death') ? Math.max(totalAnswered, 1) : currentQuizQuestions.length;
+      const percentage = Math.round((score / totalPossible) * 100);
+
+      saveScoreToLeaderboard('quiz', score, `${percentage}% (${quizMode})`);
+
+      document.getElementById('quiz-active-box').classList.add('hidden');
+      document.getElementById('quiz-result-box').classList.remove('hidden');
+
+      document.getElementById('result-score-val').innerText = `${score} / ${totalPossible}`;
+      document.getElementById('result-percentage-val').innerText = `${percentage}%`;
+
+      const badgeIcon = document.getElementById('result-badge-icon');
+      const resTitle = document.getElementById('result-title');
+      const resSubtitle = document.getElementById('result-subtitle');
+
+      if (quizMode === 'sudden_death') {
+        badgeIcon.innerText = "🔥";
+        badgeIcon.className = "w-20 h-20 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mx-auto mb-4 text-3xl shadow-lg";
+        resTitle.innerText = `سلسلة بطول: ${score} سؤال متتالي!`;
+        resSubtitle.innerText = "تحدي ممتاز لسرعة البديهة والتركيز.";
+      } else if (percentage >= 80) {
+        badgeIcon.innerText = "🏆";
+        badgeIcon.className = "w-20 h-20 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-4 text-3xl shadow-lg";
+        resTitle.innerText = "أداء استثنائي رائع!";
+        resSubtitle.innerText = "جاهزية ممتازة للاختبار النصفي.";
+      } else {
+        badgeIcon.innerText = "💡";
+        badgeIcon.className = "w-20 h-20 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center mx-auto mb-4 text-3xl shadow-lg";
+        resTitle.innerText = "مراجعة جيدة ومفيدة!";
+        resSubtitle.innerText = "تم حفظ الأسئلة الخاطئة في قسم (أخطائي فقط) لتكرارها.";
+      }
+
+      const reviewBox = document.getElementById('quiz-review-list');
+      reviewBox.innerHTML = '';
+      currentQuizQuestions.slice(0, Math.max(totalAnswered, 1)).forEach((q, idx) => {
+        const userChoice = studentAnswers[idx];
+        const isRight = userChoice === q.correct;
+        const div = document.createElement('div');
+        div.className = `p-3.5 rounded-xl border text-xs leading-relaxed ${
+          isRight ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800' : 'bg-rose-50 dark:bg-rose-950/30 border-rose-200 dark:border-rose-800'
+        }`;
+        div.innerHTML = `
+          <div class="flex items-start justify-between gap-2 font-bold mb-1">
+            <span>${idx + 1}. ${q.q}</span>
+            <span class="${isRight ? 'text-emerald-600' : 'text-rose-600'}">${isRight ? '✓ صحيح' : '✗ خطأ'}</span>
+          </div>
+          <div>إجابتك: <b class="${isRight ? 'text-emerald-700 dark:text-emerald-300' : 'text-rose-700 dark:text-rose-300'}">${userChoice !== undefined ? q.options[userChoice] : 'لم تجب'}</b></div>
+          ${!isRight ? `<div>الصحيحة: <b class="text-emerald-700 dark:text-emerald-300">${q.options[q.correct]}</b></div>` : ''}
+          <div class="text-[11px] text-slate-500 mt-1">${q.explanation}</div>
+        `;
+        reviewBox.appendChild(div);
+      });
+
+      updateMistakesUI();
+      lucide.createIcons();
+    }
+
+    function returnToQuizSelector() {
+      document.getElementById('quiz-result-box').classList.add('hidden');
+      document.getElementById('quiz-intro-box').classList.remove('hidden');
+    }
+
+    function saveScoreToLeaderboard(category, score, detail) {
+      const name = localStorage.getItem('htu_guest_name') || 'طالب زائر';
+      const avatar = localStorage.getItem('htu_guest_avatar') || '🎓';
+      const key = (category === 'quiz') ? 'htu_lb_quiz' : 'htu_lb_game';
+
+      let list = JSON.parse(localStorage.getItem(key) || '[]');
+      list.push({ name, avatar, score, detail, date: new Date().toLocaleDateString('ar-JO') });
+      list.sort((a, b) => b.score - a.score);
+      list = list.slice(0, 10);
+
+      localStorage.setItem(key, JSON.stringify(list));
+      renderLeaderboard();
+    }
+
+    function renderLeaderboard() {
+      const quizList = JSON.parse(localStorage.getItem('htu_lb_quiz') || '[]');
+      const gameList = JSON.parse(localStorage.getItem('htu_lb_game') || '[]');
+
+      const qBox = document.getElementById('quiz-leaderboard-list');
+      const gBox = document.getElementById('game-leaderboard-list');
+
+      qBox.innerHTML = quizList.length ? '' : '<p class="text-slate-400 py-4 text-center">لا توجد اختبارات مسجلة بعد. كن أول من يختبر!</p>';
+      quizList.forEach((item, idx) => {
+        qBox.innerHTML += `
+          <div class="p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <span class="w-6 h-6 rounded-full ${idx === 0 ? 'bg-amber-400 text-slate-900 font-black' : 'bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-200 font-bold'} flex items-center justify-center text-[10px]">${idx + 1}</span>
+              <span class="text-lg">${item.avatar}</span>
+              <div>
+                <b class="text-slate-800 dark:text-slate-100">${item.name}</b>
+                <span class="block text-[10px] text-slate-400">${item.detail} • ${item.date}</span>
+              </div>
+            </div>
+            <span class="font-extrabold text-purple-700 dark:text-purple-300 text-sm">${item.score} نقطة</span>
+          </div>
+        `;
+      });
+
+      gBox.innerHTML = gameList.length ? '' : '<p class="text-slate-400 py-4 text-center">لا توجد نتائج مسجلة في HTU Run بعد. العب الآن!</p>';
+      gameList.forEach((item, idx) => {
+        gBox.innerHTML += `
+          <div class="p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <span class="w-6 h-6 rounded-full ${idx === 0 ? 'bg-rose-500 text-white font-black' : 'bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-200 font-bold'} flex items-center justify-center text-[10px]">${idx + 1}</span>
+              <span class="text-lg">${item.avatar}</span>
+              <div>
+                <b class="text-slate-800 dark:text-slate-100">${item.name}</b>
+                <span class="block text-[10px] text-slate-400">${item.detail} • ${item.date}</span>
+              </div>
+            </div>
+            <span class="font-extrabold text-rose-600 dark:text-rose-400 font-mono text-sm">${item.score}</span>
+          </div>
+        `;
+      });
+    }
+
+    function resetLeaderboardConfirm() {
+      if (confirm("هل تريد مسح لوحة المتصدرين المحلية؟")) {
+        localStorage.removeItem('htu_lb_quiz');
+        localStorage.removeItem('htu_lb_game');
+        renderLeaderboard();
+      }
+    }
+
+    let gameCanvas, ctx;
+    let gameRunning = false;
+    let gameAnimFrame;
+    let playerCharType = 'boy_short';
+    let gameScore = 0;
+    let gameCoffee = 0;
+    let gameSpeed = 4.5;
+    let gameHighScore = parseInt(localStorage.getItem('htu_game_highscore') || '0');
+
+    let player = {
+      x: 60,
+      y: 200,
+      w: 32,
+      h: 48,
+      dy: 0,
+      jumpForce: -10.5,
+      gravity: 0.55,
+      grounded: true,
+      frame: 0
+    };
+
+    let obstacles = [];
+    let coffees = [];
+    let clouds = [];
+    let campusBldgs = [];
+
+    function setPlayerChar(type) {
+      playerCharType = type;
+      document.querySelectorAll('.char-opt-btn').forEach(b => {
+        b.classList.remove('border-rose-500', 'bg-rose-500/30', 'text-white');
+        b.classList.add('border-white/20', 'text-slate-200');
+      });
+      const chosen = document.getElementById(`char-btn-${type}`);
+      if (chosen) {
+        chosen.classList.add('border-rose-500', 'bg-rose-500/30', 'text-white');
+      }
+    }
+
+    function initGame() {
+      gameCanvas = document.getElementById('gameCanvas');
+      ctx = gameCanvas.getContext('2d');
+      document.getElementById('game-high-txt').innerText = gameHighScore;
+
+      window.addEventListener('keydown', (e) => {
+        if (e.code === 'Space' || e.code === 'ArrowUp') {
+          if (document.getElementById('view-game').classList.contains('hidden')) return;
+          e.preventDefault();
+          triggerPlayerJump();
+        }
+      });
+
+      gameCanvas.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        triggerPlayerJump();
+      }, { passive: false });
+
+      gameCanvas.addEventListener('mousedown', () => {
+        triggerPlayerJump();
+      });
+
+      generateBackgroundElements();
+      drawGameStaticScene();
+    }
+
+    function triggerPlayerJump() {
+      if (!gameRunning) return;
+      if (player.grounded) {
+        player.dy = player.jumpForce;
+        player.grounded = false;
+      }
+    }
+
+    function generateBackgroundElements() {
+      campusBldgs = [
+        { x: 0, w: 180, h: 140, type: 'arch' },
+        { x: 220, w: 160, h: 170, type: 'htu_main' },
+        { x: 420, w: 190, h: 130, type: 'bridge' },
+        { x: 650, w: 170, h: 150, type: 'arch' }
+      ];
+      clouds = [
+        { x: 50, y: 30, s: 0.5 },
+        { x: 250, y: 50, s: 0.8 },
+        { x: 500, y: 25, s: 0.6 },
+        { x: 720, y: 40, s: 0.7 }
+      ];
+    }
+
+    function startArcadeGame() {
+      document.getElementById('game-overlay').classList.add('hidden');
+      gameRunning = true;
+      gameScore = 0;
+      gameCoffee = 0;
+      gameSpeed = 4.5;
+      obstacles = [];
+      coffees = [];
+      player.y = 200;
+      player.dy = 0;
+      player.grounded = true;
+
+      cancelAnimationFrame(gameAnimFrame);
+      gameLoop();
+    }
+
+    function gameLoop() {
+      if (!gameRunning) return;
+      updateGame();
+      drawGame();
+      gameAnimFrame = requestAnimationFrame(gameLoop);
+    }
+
+    function updateGame() {
+      gameScore++;
+      document.getElementById('game-score-txt').innerText = gameScore;
+      document.getElementById('game-coffee-count').innerText = gameCoffee;
+
+      if (gameScore % 500 === 0 && gameSpeed < 9.5) {
+        gameSpeed += 0.4;
+      }
+
+      player.dy += player.gravity;
+      player.y += player.dy;
+      if (player.y >= 200) {
+        player.y = 200;
+        player.dy = 0;
+        player.grounded = true;
+      }
+
+      campusBldgs.forEach(b => {
+        b.x -= gameSpeed * 0.35;
+      });
+      if (campusBldgs[0].x + campusBldgs[0].w < 0) {
+        const first = campusBldgs.shift();
+        first.x = campusBldgs[campusBldgs.length - 1].x + campusBldgs[campusBldgs.length - 1].w + 50;
+        campusBldgs.push(first);
+      }
+
+      clouds.forEach(c => {
+        c.x -= c.s * 0.8;
+        if (c.x < -80) c.x = gameCanvas.width + 40;
+      });
+
+      if (Math.random() < 0.015 && (obstacles.length === 0 || obstacles[obstacles.length - 1].x < gameCanvas.width - 240)) {
+        const types = ['doctor', 'books', 'bin'];
+        const chosen = types[Math.floor(Math.random() * types.length)];
+        let w = 26, h = 42;
+        if (chosen === 'books') { w = 24; h = 24; }
+        if (chosen === 'bin') { w = 28; h = 32; }
+
+        obstacles.push({
+          x: gameCanvas.width + 20,
+          y: 248 - h,
+          w: w,
+          h: h,
+          type: chosen
+        });
+      }
+
+      if (Math.random() < 0.012 && (coffees.length === 0 || coffees[coffees.length - 1].x < gameCanvas.width - 200)) {
+        coffees.push({
+          x: gameCanvas.width + 30,
+          y: 155 - Math.random() * 40,
+          w: 18,
+          h: 22,
+          taken: false
+        });
+      }
+
+      for (let i = obstacles.length - 1; i >= 0; i--) {
+        const obs = obstacles[i];
+        obs.x -= gameSpeed;
+
+        if (
+          player.x < obs.x + obs.w &&
+          player.x + player.w > obs.x &&
+          player.y < obs.y + obs.h &&
+          player.y + player.h > obs.y
+        ) {
+          triggerGameOver();
+          return;
+        }
+
+        if (obs.x + obs.w < -20) obstacles.splice(i, 1);
+      }
+
+      for (let j = coffees.length - 1; j >= 0; j--) {
+        const c = coffees[j];
+        c.x -= gameSpeed;
+
+        if (!c.taken &&
+          player.x < c.x + c.w &&
+          player.x + player.w > c.x &&
+          player.y < c.y + c.h &&
+          player.y + player.h > c.y
+        ) {
+          c.taken = true;
+          gameCoffee++;
+          gameScore += 50;
+        }
+
+        if (c.x + c.w < -20 || c.taken) coffees.splice(j, 1);
+      }
+    }
+
+    function triggerGameOver() {
+      gameRunning = false;
+      cancelAnimationFrame(gameAnimFrame);
+
+      if (gameScore > gameHighScore) {
+        gameHighScore = gameScore;
+        localStorage.setItem('htu_game_highscore', gameHighScore);
+        document.getElementById('game-high-txt').innerText = gameHighScore;
+      }
+
+      saveScoreToLeaderboard('game', gameScore, `${gameCoffee} كاسات قهوة ☕`);
+
+      const overlay = document.getElementById('game-overlay');
+      const title = document.getElementById('overlay-title');
+      const msg = document.getElementById('overlay-msg');
+      overlay.classList.remove('hidden');
+      title.innerText = "GAME OVER";
+      title.className = "text-2xl font-black pixel-font text-rose-500 mb-2";
+      msg.innerHTML = `اصطدمت بعائق جامعي!<br>السكور النهائي: <b>${gameScore}</b> | القهوة: <b>${gameCoffee}</b> ☕`;
+    }
+
+    function drawGame() {
+      ctx.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
+
+      const skyGrad = ctx.createLinearGradient(0, 0, 0, 248);
+      skyGrad.addColorStop(0, '#7dd3fc');
+      skyGrad.addColorStop(1, '#bae6fd');
+      ctx.fillStyle = skyGrad;
+      ctx.fillRect(0, 0, gameCanvas.width, 248);
+
+      ctx.fillStyle = '#ffffff';
+      clouds.forEach(c => {
+        drawPixelCloud(ctx, c.x, c.y);
+      });
+
+      campusBldgs.forEach(b => {
+        drawCampusBuilding(ctx, b);
+      });
+
+      ctx.fillStyle = '#e2e8f0';
+      ctx.fillRect(0, 248, gameCanvas.width, 52);
+      ctx.fillStyle = '#cbd5e1';
+      for (let gx = 0; gx < gameCanvas.width; gx += 30) {
+        ctx.fillRect(gx, 250, 2, 48);
+      }
+      ctx.fillStyle = '#94a3b8';
+      ctx.fillRect(0, 248, gameCanvas.width, 3);
+
+      drawHTULogoOnGrass(ctx, 30 - ((gameScore * 0.4) % 600));
+
+      obstacles.forEach(obs => {
+        if (obs.type === 'doctor') drawPixelDoctor(ctx, obs.x, obs.y);
+        else if (obs.type === 'books') drawPixelBooks(ctx, obs.x, obs.y);
+        else if (obs.type === 'bin') drawPixelBin(ctx, obs.x, obs.y);
+      });
+
+      coffees.forEach(c => {
+        drawPixelCoffeeCup(ctx, c.x, c.y);
+      });
+
+      drawPixelStudent(ctx, player.x, player.y, playerCharType);
+    }
+
+    function drawGameStaticScene() {
+      drawGame();
+    }
+
+    function drawPixelCloud(ctx, x, y) {
+      ctx.fillRect(x + 10, y, 30, 10);
+      ctx.fillRect(x, y + 10, 50, 12);
+    }
+
+    function drawCampusBuilding(ctx, b) {
+      ctx.fillStyle = '#f1f5f9';
+      ctx.fillRect(b.x, 248 - b.h, b.w, b.h);
+      ctx.strokeStyle = '#cbd5e1';
+      ctx.strokeRect(b.x, 248 - b.h, b.w, b.h);
+
+      ctx.fillStyle = '#0284c7';
+      for (let wx = b.x + 15; wx < b.x + b.w - 15; wx += 24) {
+        for (let wy = (248 - b.h) + 15; wy < 225; wy += 26) {
+          ctx.fillRect(wx, wy, 14, 14);
+        }
+      }
+
+      if (b.type === 'bridge') {
+        ctx.fillStyle = '#e2e8f0';
+        ctx.beginPath();
+        ctx.arc(b.x + b.w / 2, 248 - b.h + 30, 45, 0, Math.PI, true);
+        ctx.fill();
+        ctx.strokeStyle = '#94a3b8';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+    }
+
+    function drawHTULogoOnGrass(ctx, x) {
+      if (x < -100 || x > gameCanvas.width + 100) return;
+      ctx.fillStyle = '#e11d48';
+      ctx.fillRect(x, 232, 34, 16);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 10px monospace';
+      ctx.fillText('HTU', x + 5, 244);
+    }
+
+    function drawPixelStudent(ctx, x, y, type) {
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(x + 6, y + 36, 8, 12);
+      ctx.fillRect(x + 18, y + 36, 8, 12);
+
+      ctx.fillStyle = '#2563eb';
+      ctx.fillRect(x + 6, y + 26, 20, 12);
+
+      ctx.fillStyle = (type.startsWith('girl')) ? '#9333ea' : '#10b981';
+      ctx.fillRect(x + 4, y + 14, 24, 14);
+
+      ctx.fillStyle = '#fed7aa';
+      ctx.fillRect(x + 8, y + 4, 16, 12);
+
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(x + 18, y + 8, 3, 3);
+
+      if (type === 'boy_short') {
+        ctx.fillStyle = '#451a03';
+        ctx.fillRect(x + 6, y, 20, 6);
+        ctx.fillRect(x + 6, y + 4, 4, 6);
+      } else if (type === 'boy_med') {
+        ctx.fillStyle = '#171717';
+        ctx.fillRect(x + 5, y - 2, 22, 8);
+        ctx.fillRect(x + 4, y + 4, 6, 9);
+      } else if (type === 'girl_long') {
+        ctx.fillStyle = '#78350f';
+        ctx.fillRect(x + 5, y, 22, 6);
+        ctx.fillRect(x + 4, y + 4, 6, 20);
+      } else if (type === 'girl_hijab') {
+        ctx.fillStyle = '#e2e8f0';
+        ctx.fillRect(x + 6, y, 20, 6);
+        ctx.fillRect(x + 5, y + 4, 5, 18);
+        ctx.fillRect(x + 5, y + 14, 22, 6);
+      }
+    }
+
+    function drawPixelDoctor(ctx, x, y) {
+      ctx.fillStyle = '#334155';
+      ctx.fillRect(x + 5, y + 28, 6, 14);
+      ctx.fillRect(x + 15, y + 28, 6, 14);
+
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(x + 3, y + 12, 20, 18);
+
+      ctx.fillStyle = '#e11d48';
+      ctx.fillRect(x + 12, y + 13, 3, 10);
+
+      ctx.fillStyle = '#fde047';
+      ctx.fillRect(x + 6, y + 3, 14, 10);
+      ctx.fillStyle = '#0f172a';
+      ctx.strokeRect(x + 12, y + 5, 5, 3);
+
+      ctx.fillStyle = '#94a3b8';
+      ctx.fillRect(x + 5, y, 16, 4);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(x - 2, y + 16, 7, 9);
+    }
+
+    function drawPixelBooks(ctx, x, y) {
+      ctx.fillStyle = '#dc2626';
+      ctx.fillRect(x, y + 16, 24, 8);
+      ctx.fillStyle = '#2563eb';
+      ctx.fillRect(x + 2, y + 8, 20, 8);
+      ctx.fillStyle = '#16a34a';
+      ctx.fillRect(x + 4, y, 16, 8);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(x + 1, y + 18, 2, 4);
+    }
+
+    function drawPixelBin(ctx, x, y) {
+      ctx.fillStyle = '#475569';
+      ctx.fillRect(x, y, 28, 32);
+      ctx.fillStyle = '#10b981';
+      ctx.fillRect(x + 4, y + 6, 20, 20);
+    }
+
+    function drawPixelCoffeeCup(ctx, x, y) {
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(x + 2, y, 14, 4);
+      ctx.fillStyle = '#0f766e';
+      ctx.fillRect(x + 3, y + 4, 12, 16);
+      ctx.fillStyle = '#f59e0b';
+      ctx.fillRect(x + 7, y + 9, 4, 4);
+    }
+
+    function renderCheatSheet() {
+      const datesBox = document.getElementById('dates-list');
+      datesBox.innerHTML = '';
+      CHEAT_DATES.forEach(d => {
+        datesBox.innerHTML += `
+          <div class="cheat-entry p-3 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-100 dark:border-slate-700 flex items-center justify-between text-xs">
+            <span class="font-semibold text-slate-700 dark:text-slate-200">${d.title}</span>
+            <span class="font-bold text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-950/60 px-2 py-1 rounded-md shrink-0 mr-2">${d.date}</span>
+          </div>`;
+      });
+
+      const ranksBox = document.getElementById('ranks-list');
+      ranksBox.innerHTML = '';
+      CHEAT_RANKS.forEach(r => {
+        ranksBox.innerHTML += `
+          <div class="cheat-entry p-3 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-100 dark:border-slate-700 flex items-center justify-between text-xs">
+            <span class="font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-1 rounded-md shrink-0 ml-2">${r.rank}</span>
+            <span class="text-slate-600 dark:text-slate-300 font-medium">${r.badge}</span>
+          </div>`;
+      });
+    }
+
+    function filterCheatSheet() {
+      const query = document.getElementById('cheat-search-input').value.toLowerCase();
+      document.querySelectorAll('.cheat-entry').forEach(entry => {
+        entry.style.display = entry.innerText.toLowerCase().includes(query) ? 'flex' : 'none';
+      });
+    }
+
+    function updateFlashcardView() {
+      const card = FLASHCARDS[currentCardIdx];
+      document.getElementById('card-counter').innerText = `${currentCardIdx + 1} / ${FLASHCARDS.length}`;
+      document.getElementById('card-question-text').innerText = card.q;
+      document.getElementById('card-answer-text').innerText = card.a;
+      document.getElementById('flashcard-inner').classList.remove('rotate-y-180');
+      isCardFlipped = false;
+    }
+
+    function flipCurrentCard() {
+      isCardFlipped = !isCardFlipped;
+      document.getElementById('flashcard-inner').classList.toggle('rotate-y-180', isCardFlipped);
+    }
+
+    function nextCard() {
+      currentCardIdx = (currentCardIdx + 1) % FLASHCARDS.length;
+      updateFlashcardView();
+    }
+
+    function prevCard() {
+      currentCardIdx = (currentCardIdx - 1 + FLASHCARDS.length) % FLASHCARDS.length;
+      updateFlashcardView();
+    }
+
+    function loadNotebook() {
+      document.getElementById('student-notebook-area').value = localStorage.getItem('htu_student_notebook') || '';
+      updateNotebookMetrics();
+    }
+
+    function saveNotebookText() {
+      const val = document.getElementById('student-notebook-area').value;
+      localStorage.setItem('htu_student_notebook', val);
+      updateNotebookMetrics();
+    }
+
+    function updateNotebookMetrics() {
+      const val = document.getElementById('student-notebook-area').value;
+      document.getElementById('notebook-char-count').innerText = `${val.length} حرف`;
+    }
+
+    function copyNotebookText() {
+      navigator.clipboard.writeText(document.getElementById('student-notebook-area').value).then(() => {
+        alert("تم نسخ الملاحظات إلى الحافظة!");
+      });
+    }
+
+    function clearNotebookText() {
+      if (confirm("هل تريد مسح جميع الملاحظات؟")) {
+        document.getElementById('student-notebook-area').value = '';
+        saveNotebookText();
+      }
+    }
+
+    function submitFeedbackLocal() {
+      const type = document.getElementById('feedback-type').value;
+      const content = document.getElementById('feedback-content').value.trim();
+      if (!content) return alert("يرجى كتابة نص الاقتراح");
+
+      const existing = JSON.parse(localStorage.getItem('htu_feedbacks') || '[]');
+      existing.push({ type, content, date: new Date().toLocaleString('ar-JO') });
+      localStorage.setItem('htu_feedbacks', JSON.stringify(existing));
+
+      document.getElementById('feedback-content').value = '';
+      const msg = document.getElementById('feedback-success-msg');
+      msg.classList.remove('hidden');
+      setTimeout(() => msg.classList.add('hidden'), 4000);
+    }
+
+    function loadGuestProfile() {
+      const name = localStorage.getItem('htu_guest_name') || 'طالب زائر';
+      const avatar = localStorage.getItem('htu_guest_avatar') || '🎓';
+      document.getElementById('badge-name').innerText = name;
+      document.getElementById('badge-avatar').innerText = avatar;
+      document.getElementById('guest-name-input').value = name;
+      selectedAvatarChar = avatar;
+    }
+
+    function selectAvatar(char) {
+      selectedAvatarChar = char;
+      document.getElementById('profile-modal-avatar').innerText = char;
+    }
+
+    function saveGuestProfile() {
+      const name = document.getElementById('guest-name-input').value.trim() || 'طالب زائر';
+      localStorage.setItem('htu_guest_name', name);
+      localStorage.setItem('htu_guest_avatar', selectedAvatarChar);
+      loadGuestProfile();
+      closeProfileModal();
+    }
+
+    function openProfileModal() { document.getElementById('modal-profile').classList.remove('hidden'); }
+    function closeProfileModal() { document.getElementById('modal-profile').classList.add('hidden'); }
+    function openAdminModal() { document.getElementById('modal-admin').classList.remove('hidden'); }
+    function closeAdminModal() { document.getElementById('modal-admin').classList.add('hidden'); }
+
+    async function verifyAdminPass() {
+      const input = document.getElementById('admin-pass-input').value;
+      const hash = await sha256(input);
+      if (hash === ENCRYPTED_ADMIN_HASH) {
+        document.getElementById('admin-login-state').classList.add('hidden');
+        document.getElementById('admin-dashboard-state').classList.remove('hidden');
+        const list = JSON.parse(localStorage.getItem('htu_feedbacks') || '[]');
+        const box = document.getElementById('admin-feedback-list');
+        box.innerHTML = list.length ? '' : '<span>لا توجد اقتراحات.</span>';
+        list.forEach((item, idx) => {
+          box.innerHTML += `<div class="p-2 bg-slate-50 dark:bg-slate-700/60 rounded">#${idx+1} [${item.type}]: ${item.content}</div>`;
+        });
+      } else {
+        document.getElementById('admin-error-msg').classList.remove('hidden');
+      }
+    }
+
+    function logoutAdmin() {
+      document.getElementById('admin-dashboard-state').classList.add('hidden');
+      document.getElementById('admin-login-state').classList.remove('hidden');
+      closeAdminModal();
+    }
+
+    function exportQuestionsJSON() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(QUESTION_BANK, null, 2));
+      const a = document.createElement('a');
+      a.href = dataStr;
+      a.download = "HTU_Military_Questions.json";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }
+  </script>
+</body>
+</html>
